@@ -88,19 +88,24 @@ export default function App() {
   
   getFatCaloriesMultiplier = () => {
     switch (macrosInfo.goal) {
-      case 1: { // lose weight
+      case '1': { // lose weight
+        console.log(`getFatCaloriesMultiplier: 0.2`)
         return 0.2;
       }
-      case 2: { // lose 10-20 lbs
+      case '2': { // lose 10-20 lbs
+        console.log(`getFatCaloriesMultiplier: 0.325`)
         return 0.325;
       }
-      case 3: { // lean but add muscle
+      case '3': { // lean but add muscle
+        console.log(`getFatCaloriesMultiplier: 0.4`)
         return 0.4;
       }
-      case 4: { // build muscle or horomone balance
+      case '4': { // build muscle or horomone balance
+        console.log(`getFatCaloriesMultiplier: 0.5`)
         return 0.5;
       }
       default: {
+        console.log(`getFatCaloriesMultiplier: 0.4`)
         return 0.4;
       }
     }
@@ -109,14 +114,14 @@ export default function App() {
   const calcFat = () => {
     //console.log(`calcFat: BMR=${adjustedBMR()} Cal Deficit=${macrosInfo.calorieDeficit} FatLoss=${getFatCaloriesMultiplier()} Fat=${calcFat()} Cals/gram: ${macrosInfo.macrosKey[2].caloriesPerGram}`)
     const caloriesPerDay = adjustedBMR();
-    //console.log(`calcFat caloriesPerDay: ${caloriesPerDay}`);
+    console.log(`calcFat caloriesPerDay: ${caloriesPerDay}`);
     const fatLossMultiplier = getFatCaloriesMultiplier();
     const fatLossGoal = caloriesPerDay * fatLossMultiplier;
-    //console.log(`calcFat fatLossGoal: ${fatLossGoal}`)
+    console.log(`calcFat fatLossGoal: ${fatLossGoal}`)
     const caloriesPerGram = macrosInfo.macrosKey[2].caloriesPerGram;
     //console.log(`calcFat Step 3: ${caloriesPerGram}`)
     const fatGrams = Math.ceil(Math.round((fatLossGoal / caloriesPerGram) * 10)/10);
-    //console.log(`calcFat fatGrams: ${fatGrams}`);
+    console.log(`calcFat fatGrams: ${fatGrams}`);
     return fatGrams;
   }
   
