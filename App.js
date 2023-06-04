@@ -9,10 +9,9 @@ export default function App() {
     height:72,
     weight: 150,
     calorieDeficit: 0, // Number of calories to eat less than BMR
-    activityLevel: 1, // 1=sedentary 1.2; 2=light activity 1.375; 3)moderate activity 1.55; 4)very active 1.725; 5)extra active
+    activityLevel: 1, // 1=sedentary 1.2; 2=light activity 1.375; 3)moderate activity 1.55; 4)very active 1.725; 5)extra active 1.9
     goal: 1, // 1)lose weight 2)maintain weight 3)gain weight
     proteinRequired: 1.0, // higher bodyfat % 0.7; Lose 10-20 lbs 0.8; Lean but add more muscle 1.0; Build muscle 1-1.2
-    fatLoss:0.5, // extreme fat loss 0.2; want to lose weight 0.3 - 0.35; maintain weight 0.4 - 0.45; build muscle 0.5 - 0.55
     macrosKey: [{'macro': 'protein', 'caloriesPerGram': 4}, 
                 {'macro': 'carbs', 'caloriesPerGram': 4},
                 {'macro': 'fat', 'caloriesPerGram': 9}],
@@ -20,43 +19,114 @@ export default function App() {
                           
   const [macrosInfo, setmacrosInfo] = useState(initialState);
   
-  console.table(macrosInfo);
+  //console.table(macrosInfo);
   
   const calcBMR = () => {
     //return 9.99 * macrosInfo.weight + 6.25 * macrosInfo.height - 4.92 * macrosInfo.age + 166;
     return Math.ceil(Math.round((447.6 + (9.2 * macrosInfo.weight) + (3.1 * macrosInfo.height * 2.54) - (4.3 * macrosInfo.age)) * 10)/10);
   }
   
+  const adjustedBMR = () => {
+    const activityLevelAdjustment = getAdjustedActivityLevel();
+    //console.log(`calcBMR: ${calcBMR()} activityLevelAdjustment: ${activityLevelAdjustment} adjustedBMR: ${calcBMR() * activityLevelAdjustment}`);
+    return calcBMR() * activityLevelAdjustment;
+  }
+  
+  const getAdjustedActivityLevel = () => {
+    //console.log(`activityLevel: ${macrosInfo.activityLevel}`);
+    switch (macrosInfo.activityLevel) {
+      case '1': { // sedentary
+        return 1.2;
+      }
+      case '2': { // light activity
+        return 1.375;
+      }
+      case '3': { // moderate activity
+        return 1.55;
+      }
+      case '4': { // very active
+        return 1.725;
+      }
+      case '5': { // extra active
+        return 1.9;
+      }
+      default: {
+        return 1.0;
+      }
+    }
+  }
+  
+  const getProteinRequiredMultiplier = () => {
+    switch (macrosInfo.goal) {
+      case '1': { // lose weight
+        return 0.7;
+      }
+      case '2': { // lose 10-20 lbs
+        return 0.8;
+      }
+      case '3': { // lean but add muscle
+        return 1.0;
+      }
+      case '4': { // build muscle
+        return 1.2;
+      }
+      default: {
+        return 0.7;
+      }
+    }
+  }
+  
   const calcProtein = () => {
-    console.log(`calcProtein: ${(macrosInfo.weight * macrosInfo.proteinRequired)} Cals/gram: ${macrosInfo.macrosKey[0].caloriesPerGram}`)
-    let proteinMultiplier = 1.0;
-     // higher bodyfat % 0.7; Lose 10-20 lbs 0.8; Lean but add more muscle 1.0; Build muscle 1-1.2
-    // switch(macrosInfo.proteinRequired){
-    //   case 0.7:
-    //   case 0.8:
-    //   case 1.0:
-    // }
-    
-    return Math.ceil(Math.round((macrosInfo.weight * macrosInfo.proteinRequired) * macrosInfo.macrosKey[0].caloriesPerGram * 10)/10);
+    let proteinMultiplier = getProteinRequiredMultiplier();
+    // console.log(`calcProtein: ${(macrosInfo.weight * proteinMultiplier)} Cals/gram: ${macrosInfo.macrosKey[0].caloriesPerGram}`)
+    return Math.ceil(Math.round((macrosInfo.weight * proteinMultiplier) * 10)/10);
+  }
+  
+  const getProteinCalories = () => {
+    return calcProtein() * macrosInfo.macrosKey[0].caloriesPerGram;
+  }
+  
+  getFatCaloriesMultiplier = () => {
+    switch (macrosInfo.goal) {
+      case 1: { // lose weight
+        return 0.2;
+      }
+      case 2: { // lose 10-20 lbs
+        return 0.325;
+      }
+      case 3: { // lean but add muscle
+        return 0.4;
+      }
+      case 4: { // build muscle or horomone balance
+        return 0.5;
+      }
+      default: {
+        return 0.4;
+      }
+    }
   }
   
   const calcFat = () => {
-    //console.log(`calcFat: BMR=${calcBMR()} Cal Deficit=${macrosInfo.calorieDeficit} FatLoss=${macrosInfo.fatLoss} Fat=${calcFat()} Cals/gram: ${macrosInfo.macrosKey[2].caloriesPerGram}`)
-    //console.log(`calcFat: BMR=${calcBMR()} Cal Deficit=${macrosInfo.calorieDeficit} FatLoss=${macrosInfo.fatLoss} Cals/gram: ${macrosInfo.macrosKey[2].caloriesPerGram}`)
-    const caloriesPerDay = calcBMR() - macrosInfo.calorieDeficit;
+    //console.log(`calcFat: BMR=${adjustedBMR()} Cal Deficit=${macrosInfo.calorieDeficit} FatLoss=${getFatCaloriesMultiplier()} Fat=${calcFat()} Cals/gram: ${macrosInfo.macrosKey[2].caloriesPerGram}`)
+    const caloriesPerDay = adjustedBMR();
     //console.log(`calcFat caloriesPerDay: ${caloriesPerDay}`);
-    const fatLossGoal = caloriesPerDay * macrosInfo.fatLoss;
+    const fatLossMultiplier = getFatCaloriesMultiplier();
+    const fatLossGoal = caloriesPerDay * fatLossMultiplier;
     //console.log(`calcFat fatLossGoal: ${fatLossGoal}`)
     const caloriesPerGram = macrosInfo.macrosKey[2].caloriesPerGram;
     //console.log(`calcFat Step 3: ${caloriesPerGram}`)
     const fatGrams = Math.ceil(Math.round((fatLossGoal / caloriesPerGram) * 10)/10);
-    console.log(`calcFat fatGrams: ${fatGrams}`);
+    //console.log(`calcFat fatGrams: ${fatGrams}`);
     return fatGrams;
   }
   
+  const getFatCalories = () => {
+    return calcFat() * macrosInfo.macrosKey[2].caloriesPerGram;
+  }
+  
   const calcCarbs = () => {
-    console.log(`calcCarbs: BMR=${calcBMR()} Cal Deficit=${macrosInfo.calorieDeficit} Protein=${calcProtein()} Fat=${calcFat()} Cals/gram: ${macrosInfo.macrosKey[1].caloriesPerGram}`)
-    return Math.ceil(Math.round(((calcBMR() - macrosInfo.calorieDeficit - calcProtein() - calcFat()) / macrosInfo.macrosKey[1].caloriesPerGram)*10)/10);
+    //console.log(`calcCarbs: BMR=${adjustedBMR()} Cal Deficit=${macrosInfo.calorieDeficit} Protein=${calcProtein()} Fat=${calcFat()} Cals/gram: ${macrosInfo.macrosKey[1].caloriesPerGram}`)
+    return Math.ceil(Math.round(((adjustedBMR() - macrosInfo.calorieDeficit - getProteinCalories() - getFatCalories()) / macrosInfo.macrosKey[1].caloriesPerGram)*10)/10);
   }
   
   const displayMacros = () => {
@@ -115,7 +185,7 @@ export default function App() {
         onChangeText={(e) => setmacrosInfo({...macrosInfo, goal: e})}
         value={macrosInfo.goal}
       />
-      <Text style={styles.basicText}>BMR: {calcBMR()}</Text>
+      <Text style={styles.basicText}>BMR: {adjustedBMR()}</Text>
       <Text style={styles.basicText}>Macros Protein/Carbs/Fat</Text>
       <Text style={styles.basicText}>{displayMacros()}</Text>
     </View>
