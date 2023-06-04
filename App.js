@@ -1,6 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import React, {useState, useEffect} from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
+import DropDownPicker from 'react-native-dropdown-picker';
 
 export default function App() {
   const initialState = {
@@ -18,7 +19,24 @@ export default function App() {
   }
                           
   const [macrosInfo, setmacrosInfo] = useState(initialState);
-  
+  const [activityLevelOpen, setActivityLevelOpen] = useState(false);
+  const [activityLevelValue, setActivityLevelValue] = useState(null);
+  const [activityLevelItems, setActivityLevelItems] = useState([
+    {label: 'Sedentary', value: '1'},
+    {label: 'Light Activity', value: '2'},
+    {label: 'Moderate Activity', value: '3'},
+    {label: 'Very Active', value: '4'},
+    {label: 'Extra Active', value: '5'},
+  ]);
+  const [goalOpen, setGoalOpen] = useState(false);
+  const [goalValue, setGoalValue] = useState(null);
+  const [goalItems, setGoalItems] = useState([
+    {label: 'Lose Weight', value: '1'},
+    {label: 'Lost 10-20 Lbs', value: '2'},
+    {label: 'Lean but add muscle', value: '3'},
+    {label: 'Grow muscle', value: '4'}
+  ]);
+
   //console.table(macrosInfo);
   
   const calcBMR = () => {
@@ -177,19 +195,25 @@ export default function App() {
         value={macrosInfo.calorieDeficit}
       />
       <Text style={styles.basicText}>Activity Level</Text>
-      <TextInput
-        style={styles.inp}
-        placholder='Enter activity level'
-        onChangeText={(e) => setmacrosInfo({...macrosInfo, activityLevel: e})}
-        value={macrosInfo.activityLevel}
-      />
+      <DropDownPicker
+            open={activityLevelOpen}
+            value={activityLevelValue}
+            items={activityLevelItems}
+            setOpen={setActivityLevelOpen}
+            setValue={setActivityLevelValue}
+            setItems={setActivityLevelItems}
+            onChangeValue={(e) => setmacrosInfo({...macrosInfo, activityLevel: e})}
+          />
       <Text style={styles.basicText}>Goal</Text>
-      <TextInput
-        style={styles.inp}
-        placholder='Enter goal'
-        onChangeText={(e) => setmacrosInfo({...macrosInfo, goal: e})}
-        value={macrosInfo.goal}
-      />
+      <DropDownPicker
+            open={goalOpen}
+            value={goalValue}
+            items={goalItems}
+            setOpen={setGoalOpen}
+            setValue={setGoalValue}
+            setItems={setGoalItems}
+            onChangeValue={(e) => setmacrosInfo({...macrosInfo, goal: e})}
+          />
       <Text style={styles.basicText}>BMR: {adjustedBMR()}</Text>
       <Text style={styles.basicText}>Macros Protein/Carbs/Fat</Text>
       <Text style={styles.basicText}>{displayMacros()}</Text>
@@ -223,5 +247,9 @@ const styles = StyleSheet.create({
     margin: 8,
     borderWidth: 1,
     padding: 4,
-  }
+  },
+  containerStyle:{
+
+  },
+  
 });
